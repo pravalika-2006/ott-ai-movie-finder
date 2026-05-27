@@ -1,19 +1,13 @@
 import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { getPopularMovies, searchMovies, getWatchProviders } from "./api/tmdb";
 import "./App.css";
+import MovieDetails from "./MovieDetails";
 
-function App() {
+function Home() {
   const [movies, setMovies] = useState([]);
   const [search, setSearch] = useState("");
-
-  // 🎭 Mood mapping
-  const moodMap = {
-    happy: "comedy fun",
-    sad: "drama emotional",
-    action: "action fight",
-    romance: "love romantic",
-    thriller: "mystery crime",
-  };
+  const navigate = useNavigate();
 
   const fetchMoviesWithProviders = async (apiCall) => {
     const data = await apiCall();
@@ -28,10 +22,7 @@ function App() {
               ?.map((p) => p.provider_name)
               .join(", ") || "";
 
-          return {
-            ...movie,
-            providers,
-          };
+          return { ...movie, providers };
         } catch {
           return { ...movie, providers: "" };
         }
@@ -47,18 +38,10 @@ function App() {
 
   useEffect(() => {
     const delay = setTimeout(() => {
-      const query = search.toLowerCase();
-
-      if (query.trim() === "") {
+      if (search.trim() === "") {
         fetchMoviesWithProviders(getPopularMovies);
-      } else if (moodMap[query]) {
-        fetchMoviesWithProviders(() =>
-          searchMovies(moodMap[query])
-        );
       } else {
-        fetchMoviesWithProviders(() =>
-          searchMovies(search)
-        );
+        fetchMoviesWithProviders(() => searchMovies(search));
       }
     }, 500);
 
@@ -67,50 +50,49 @@ function App() {
 
   return (
     <div>
+      <div className="navbar">🎬 AI OTT Movie Finder</div>
 
-      {/* HEADER */}
-      <div className="navbar">
-        🎬 AI OTT Movie Finder
-      </div>
-
-      {/* SEARCH */}
       <div className="banner">
-        <h1>Find Movies + Mood Search</h1>
+        <h1>Find Movies + Details</h1>
 
         <input
-          type="text"
-          placeholder="Try: happy, sad, action, romance, thriller OR movie name"
+          placeholder="Search movies..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{
-            padding: "10px",
-            width: "60%",
-            marginTop: "15px"
-          }}
+          style={{ padding: "10px", width: "60%" }}
         />
       </div>
 
-      {/* MOVIES */}
       <div className="movies">
         {movies.map((movie) => (
-          <div className="movie-card" key={movie.id}>
+          <div
+            className="movie-card"
+            key={movie.id}
+            onClick={() => navigate(`/movie/${movie.id}`)}
+            style={{ cursor: "pointer" }}
+          >
             <img
               src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-              alt={movie.title}
             />
             <h3>{movie.title}</h3>
 
             <p style={{ fontSize: "12px", color: "#aaa" }}>
-              {movie.providers
-                ? `Available on: ${movie.providers}`
-                : "OTT info not available"}
+              {movie.providers || "No OTT info"}
             </p>
           </div>
         ))}
       </div>
-
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/movie/:id" element={<MovieDetails />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
