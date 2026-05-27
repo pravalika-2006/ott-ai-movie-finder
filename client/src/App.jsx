@@ -6,7 +6,15 @@ function App() {
   const [movies, setMovies] = useState([]);
   const [search, setSearch] = useState("");
 
-  // 🔹 fetch movies + providers
+  // 🎭 Mood mapping
+  const moodMap = {
+    happy: "comedy fun",
+    sad: "drama emotional",
+    action: "action fight",
+    romance: "love romantic",
+    thriller: "mystery crime",
+  };
+
   const fetchMoviesWithProviders = async (apiCall) => {
     const data = await apiCall();
 
@@ -33,18 +41,24 @@ function App() {
     setMovies(moviesWithProviders);
   };
 
-  // 🔹 initial load
   useEffect(() => {
     fetchMoviesWithProviders(getPopularMovies);
   }, []);
 
-  // 🔹 search with debounce
   useEffect(() => {
     const delay = setTimeout(() => {
-      if (search.trim() === "") {
+      const query = search.toLowerCase();
+
+      if (query.trim() === "") {
         fetchMoviesWithProviders(getPopularMovies);
+      } else if (moodMap[query]) {
+        fetchMoviesWithProviders(() =>
+          searchMovies(moodMap[query])
+        );
       } else {
-        fetchMoviesWithProviders(() => searchMovies(search));
+        fetchMoviesWithProviders(() =>
+          searchMovies(search)
+        );
       }
     }, 500);
 
@@ -61,11 +75,11 @@ function App() {
 
       {/* SEARCH */}
       <div className="banner">
-        <h1>Find Movies & Where to Watch</h1>
+        <h1>Find Movies + Mood Search</h1>
 
         <input
           type="text"
-          placeholder="Search movies..."
+          placeholder="Try: happy, sad, action, romance, thriller OR movie name"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
