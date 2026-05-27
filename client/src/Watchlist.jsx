@@ -20,13 +20,13 @@ function Watchlist() {
     <div style={{ padding: "20px", color: "white" }}>
       <button onClick={() => navigate("/")}>⬅ Back</button>
 
-      <h1>❤️ My Watchlist</h1>
+      <h1>❤️ Watchlist</h1>
 
       {list.length === 0 ? (
-        <p>No movies saved yet</p>
+        <p>No movies saved</p>
       ) : (
         list.map((movie) => (
-          <div key={movie.id} style={{ marginBottom: "15px" }}>
+          <div key={movie.id}>
             <h3>{movie.title}</h3>
             <button onClick={() => removeMovie(movie.id)}>
               ❌ Remove
